@@ -24,6 +24,7 @@ def build_database():
     not_found = 0
     data = []
     slugs = []
+    bad_words = ['-', '', 'Primeira Igreja Presbiteriana Independente de Curitiba - www.ipic.org.br']
     for i, page in enumerate(pages, start=1):
         # skipping table of contents and blank pages
         if i <= 8 or i == 112 or i == 123:
@@ -37,25 +38,35 @@ def build_database():
 
         text = retstr.getvalue()
         stripped = map(str.strip, text.split('\n'))
+        stripped = filter(lambda x: x not in bad_words, stripped)
 
         # special cases
         if i == 38:
             title = stripped[2].decode('utf-8')
-            text = '\n'.join(stripped[5:])
+            text = '<br/>'.join(stripped[5:])
         elif i == 64:
-            title = stripped[4].decode('utf-8')
+            title = stripped[0].decode('utf-8')
+            text = '<br/>'.join(stripped[1:len(stripped) - 1])
+            continue
         elif i == 55:
             # append to previous page
             data[len(data) - 1]['text'] += text
             continue
+        elif i == 64:
+            text = '<br/>'.join(stripped[0:len(stripped) - 1])
+            continue
         elif i == 67:
             title = stripped[2].decode('utf-8')
-            text = '\n'.join(stripped[5:])
+            text = '</br>'.join(stripped[5:])
         elif i == 75:
             data[len(data) - 1]['text'] += text
             continue
+        elif i == 109:
+            print stripped
+            return
         else:
             title = stripped[0].decode('utf-8')
+            text = '<br/>'.join(stripped[1:len(stripped) - 1])
 
         slug = slugify(title)
         if slug in slugs:
@@ -71,7 +82,7 @@ def build_database():
     device.close()
     fp.close()
 
-    with open('../src/imports/songs.json', 'w') as f:
+    with open('../src/data/songs.json', 'w') as f:
         f.write(json.dumps(data))
 
     print 'File saved!'

@@ -3,17 +3,19 @@ import songs from '../data/songs.json';
 
 
 export default class Song extends Component {
-
+    titleStyle = {
+       textAlign: 'center'
+    }
     constructor() {
         super();
-        this._song = {}
+        this.song = {}
     }
 
     getSongData() {
         for (let song of songs) {
             if (song.slug === this.props.params.slug) {
-                this._song = song;
-                this._song.text.replace(/\n/g, "<br />");
+                this.song = song;
+                this.song.text = this.song.text.replace(/\n/g, "<br />");
                 break;
             }
         }
@@ -23,8 +25,8 @@ export default class Song extends Component {
         this.getSongData();
         return (
             <div>
-                <h1>{this._song.title}</h1>
-                <p>{this._song.text}</p>
+                <h1 style={this.titleStyle}>{this.song.title}</h1>
+                <p style={this.textStyle} dangerouslySetInnerHTML={{__html: this.song.text}} />
             </div>
         );
     }
